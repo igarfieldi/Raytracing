@@ -16,15 +16,15 @@ namespace raytracer {
 	private:
 		std::array<type, dimensions> m_data;
 
-		template < size_t Count, class T, class... Args >
-		void expand(T val, Args... args) {
+		template < size_t Count, class S, class... Args >
+		void expand(S val, Args... args) {
 			static_assert(Count < dimensions, "Too many arguments to construct vector");
 			m_data[Count] = val;
 			expand<Count + 1>(std::forward<Args>(args)...);
 		}
 
-		template < size_t Count, class T >
-		void expand(T val) {
+		template < size_t Count, class S >
+		void expand(S val) {
 			static_assert(Count < dimensions, "Too many arguments to construct vector");
 			m_data[Count] = val;
 		}
@@ -154,7 +154,7 @@ namespace raytracer {
 			return *this;
 		}
 
-		type dot(const vector<type, dimensions> &v) {
+		type dot(const vector<type, dimensions> &v) const {
 			T sum = 0;
 			for (size_t i = 0; i < dimensions; ++i) {
 				sum += m_data[i] * v.m_data[i];
@@ -162,7 +162,7 @@ namespace raytracer {
 			return sum;
 		}
 
-		vector<type, dimensions> cross(const vector<type, dimensions> &v) {
+		vector<type, dimensions> cross(const vector<type, dimensions> &v) const {
 			static_assert(dimensions == 3, "Cross product is only defined for vectors with 3 dimensions");
 			return vector<type, dimensions>(
 				y()*v.z() - z()*v.y(),
@@ -175,10 +175,20 @@ namespace raytracer {
 			return std::sqrt(this->dot(*this));
 		}
 
+		type squared_length() const {
+			return this->dot(*this);
+		}
+
 		vector<type, dimensions> &normalize() {
 			return (*this) *= T(1) / length();
 		}
 	};
+
+	template < class T >
+	using vec3 = vector<T, 3>;
+
+	using vec3f = vector<float, 3>;
+	using vec3d = vector<double, 3>;
 
 	template < class T, size_t D >
 	vector<T, D> operator+(vector<T, D> v1, const vector<T, D> &v2) {
